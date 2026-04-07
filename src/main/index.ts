@@ -1,4 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { autoUpdater } from 'electron-updater'
+import log from 'electron-log'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { writeFile } from 'fs/promises'
@@ -106,6 +108,29 @@ function registerIpcHandlers(): void {
 app.whenReady().then(() => {
   registerIpcHandlers()
   createWindow()
+
+  // Auto Updater Configuration
+  log.transports.file.level = 'info'
+  autoUpdater.logger = log
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+  
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
+
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Ready',
+      message: 'A new version of Invoice Manager has been downloaded. It will be installed the next time you restart the application.',
+      buttons: ['Restart Now', 'Later']
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall()
+      }
+    })
+  })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
