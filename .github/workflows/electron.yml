@@ -8,29 +8,24 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        
+    runs-on: ubuntu-latest
     steps:
-    - name: Check out Git repository
-      uses: actions/checkout@v4
-
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Build
-      run: npm run build
-
-    - name: Package
-      run: npm run dist
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install Snapcraft
+        run: sudo snap install snapcraft --classic
+      
+      - name: Build the application
+        run: npm run build
+      
+      - name: Publish with Snapcraft
+        run: npm run publish
