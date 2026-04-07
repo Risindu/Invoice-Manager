@@ -1,4 +1,4 @@
-name: Build Electron App
+name: Release Electron App
 
 on:
   push:
@@ -6,25 +6,22 @@ on:
       - 'v*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  publish-windows:
+    runs-on: windows-latest
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
-      
-      - name: Install dependencies
+          node-version: 20
+          
+      - name: Install Dependencies
         run: npm install
-      
-      - name: Install Snapcraft
-        run: sudo snap install snapcraft --classic
-      
-      - name: Build the application
-        run: npm run build
-      
-      - name: Publish with Snapcraft
-        run: npm run publish
+        
+      - name: Build and Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run dist -- -p always
